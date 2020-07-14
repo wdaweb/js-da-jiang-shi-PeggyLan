@@ -1,0 +1,348 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Space Shooter</title>
+    <style>
+        body {
+            overflow: hidden;
+            min-width: 1024px;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select:none;
+            background: black;
+
+        }
+
+        #range {
+            width: 100vw;
+            height: 100vh;
+            background: url(bg0.jpg) fixed no-repeat center/cover;
+            background-size: auto 100vh;
+            cursor: crosshair;
+            z-index: 0;
+        }
+
+        #img1 {
+            position: absolute;
+            border: none;
+            left: 0px;
+            top: 100px;
+            padding: 10px;
+            z-index: 1;
+        }
+
+
+        #score {
+            font: 16px normal arial, verdana, sans-serif;
+            color: red;
+            padding: 10px;
+        }
+
+
+        #btn-start {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: red;
+            width: 300px;
+            height: 100px;
+            font-size: 60px;
+            border: 0;
+            filter: drop-shadow(0 0 5px rgb(255, 106, 106)) drop-shadow(0 0 8px rgb(255, 106, 106)) drop-shadow(0 0 120px rgb(255, 106, 106));
+            color: white;
+            border-radius: 30%;
+            outline: none;
+            z-index: 2;
+        }
+
+        #btn-reload {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: red;
+            width: 300px;
+            height: 100px;
+            font-size: 60px;
+            border: 0;
+            filter: drop-shadow(0 0 5px rgb(255, 106, 106)) drop-shadow(0 0 8px rgb(255, 106, 106)) drop-shadow(0 0 120px rgb(255, 106, 106));
+            color: white;
+            border-radius: 30%;
+            outline: none;
+            z-index: 2;
+        }
+
+        #text1 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 100px;
+            font-size: 60px;
+            border: 0;
+            filter: drop-shadow(0 0 5px rgb(255, 106, 106)) drop-shadow(0 0 8px rgb(255, 106, 106)) drop-shadow(0 0 120px rgb(255, 106, 106));
+            color: white;
+            border-radius: 30%;
+            outline: none;
+        }
+
+        .high-score {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            margin: 0;
+            color: greenyellow;
+            font-size: 30px;
+            font-family: "Bauhaus 93";
+        }
+
+        .high-score1 {
+            color: red;
+            font-size: 50px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="range">
+    <div id="score"></div>
+    <input type="button" value="START" id="btn-start">
+    <input type="button" value="Reload" id="btn-reload" onclick="window.location.reload()">
+
+    <img alt="Fire!" id="img1" src=""/>
+    <span id="text1">遊戲結束</span>
+    <div class="high-score">
+        <div class="high-score1">High Score<br></div>
+        player : <span id="text-highplayer">nobody</span><br>
+        score : <span id="text-highscore">0</span>
+    </div>
+</div>
+<script>
+    document.getElementById("img1").style.display = "none"
+    document.getElementById("text1").style.display = "none"
+    document.getElementById("btn-reload").style.display = "none"
+    var timer1 = null;
+    var el = null;
+    var score = 0;    // 分数
+    var shots = 2;   // 总共射击的次数
+    var tmp_time = 70;    // 時間
+    var tmp_bg = ""
+    var tmp_img1 = ""
+    var over_size = 'N'
+
+    // let rand_num = 2
+    let rand_num = Math.floor(Math.random() * 5) + 1;
+    // 是否在遊戲中
+    var ingame = true
+    // 最高分
+    let highscore = {
+        name: '',
+        score: 0
+    }
+
+    const btnstart = document.getElementById("btn-start")
+    const texthighplayer = document.getElementById("text-highplayer")
+    const texthighscore = document.getElementById("text-highscore")
+
+    // 將localstorage存的文字轉持可以使用的陣列
+    let storage = JSON.parse(localStorage.getItem("highscore"))
+    // 如果有分數紀錄
+    if (storage !== null) {
+        // 將最高分紀錄存成變數並修改網頁文字
+        highscore.name = storage.name
+        texthighplayer.innerText = highscore.name
+        highscore.score = storage.score
+        texthighscore.innerText = highscore.score
+    }
+
+    function moveIt(num) {
+        // 图片动画
+        // console.log(num)
+        // console.log("------------")
+        // console.log(el.style.left)
+        // console.log(el.style.top)
+        // console.log(el.style.height)
+        // console.log(parseFloat(el.style.height) + 0.5)
+        // console.log(screen.width)
+        // console.log(screen.height)
+        // console.log("**********")
+        switch (num) {
+            case 1:
+                if ((parseInt(el.style.left) > (screen.width)) || (parseInt(el.style.top) > (screen.height) - 50)) {
+                    over_size = 'Y'
+                }
+                el.style.left = parseInt(el.style.left) + 5 + 'px';
+                el.style.top = parseInt(el.style.top) + parseInt(el.style.top) * 0.003 + 'px';
+                break;
+            case 2:
+                // console.log("num2")
+
+                if (parseFloat(el.style.height) > 100) {
+                    over_size = 'Y'
+                }
+                el.style.height = parseFloat(el.style.height) + 0.5 + '%';
+                break;
+            case 3:
+                // console.log("num3")
+
+                if (parseInt(el.style.left) < 0) {
+                    over_size = 'Y'
+                }
+                el.style.left = parseInt(el.style.left) - 5 + 'px';
+                break;
+            case 4:
+                // console.log("num4")
+                if (parseInt(el.style.top) > (screen.height) - 50 || parseFloat(el.style.height) > 100) {
+                    over_size = 'Y'
+                }
+                el.style.height = parseFloat(el.style.height) + 0.1 + '%';
+                break;
+            case 5:
+                // console.log("num5")
+                if ((parseInt(el.style.left) > (screen.width)) || (parseInt(el.style.top) > (screen.height) - 50)) {
+                    over_size = 'Y'
+                }
+                el.style.left = parseInt(el.style.left) - 5 + 'px';
+                el.style.top = parseInt(el.style.top) + parseInt(el.style.top) * 0.003 + 'px';
+                break;
+        }
+
+        if (over_size === 'Y') {
+            // console.log('in')
+            clearInterval(timer1);
+            shots--;
+            scoreboard();  //更新分数板
+
+            if (ingame !== false) {
+                random_img(rand_num)
+            }
+        } else {
+            timer1 = setTimeout(() => {
+                moveIt(num);
+            }, tmp_time);
+
+        }
+
+
+    }
+
+    function scoreUp(num) {
+        //增加分数
+
+        shots++;
+        score += 10;
+        tmp_time -= 10;
+        scoreboard();  //更新分数板
+        clearInterval(timer1)
+        random_img(rand_num)
+
+
+    }
+
+    function scoreboard() {
+        if (shots < 1) {
+            ingame = false
+        }
+        over_size = "N"
+
+        if (ingame === false) {
+            clearInterval(timer1)
+            document.getElementById("img1").style.display = "none"
+            document.getElementById('range').style.backgroundImage = "url(bgz22.gif)";
+
+            document.getElementById("text1").style.display = "none"
+
+            // 如果沒有分數紀錄，或是大於目前分數
+            if (storage == null || score > highscore.score) {
+                // 輸入名字
+                const input = prompt("最高分的人...就是你!!!請留下您的大名吧!")
+                // 如果有輸入
+                if (input !== null && input.trim() !== '') {
+                    // 將輸入的名字與分數存入變數
+                    highscore.score = score
+                    highscore.name = input
+                    // 修改最高分
+                    texthighplayer.innerText = highscore.name
+                    texthighscore.innerText = highscore.score
+                    // 將最高的分數轉成文字後存入localstroage
+                    localStorage.setItem("highscore", JSON.stringify(highscore))
+                }
+            }
+
+            shots = 0
+            score = 0
+            document.getElementById("btn-reload").style.display = ""
+        }
+        document.getElementById("score").innerHTML = "可射擊的次数: " + shots + "<br> 分數: " + score;
+
+    }
+
+    function rangeClick() {
+        shots--;
+        scoreboard();  //更新分数板
+    }
+
+    function random_img(num) {
+        // console.log("object");
+        clearInterval(timer1)
+        tmp_bg = "bg" + num;
+        tmp_img1 = "z" + num;
+        document.getElementById('range').style.backgroundImage = "url(" + tmp_bg + ".jpg)";
+        document.getElementById('img1').src = tmp_img1 + ".gif";
+
+        el = document.getElementById("img1");
+        switch (num) {
+            case 1:
+                el.style.height = "30%";
+                el.style.left = "50px";
+                el.style.top = "400px";
+                break
+            case 2:
+                el.style.height = "30%";
+                el.style.left = "750px";
+                el.style.top = "350px";
+                break
+            case 3:
+                el.style.height = "50%";
+                el.style.left = screen.width + "px";
+                el.style.top = "470px";
+                break
+            case 4:
+                el.style.height = "20%";
+                el.style.left = "1300px";
+                el.style.top = "380px";
+                break
+            case 5:
+                console.log(screen.width);
+                el.style.height = "20%";
+                el.style.left = "1500px";
+                el.style.top = "430px";
+                break
+        }
+        el.style.display = "";
+        el.onclick = () => {
+            scoreUp(rand_num);  // 点击图片时增加分数
+        };
+        document.getElementById("range").onclick = rangeClick;
+
+        moveIt(rand_num);
+
+        rand_num = Math.floor(Math.random() * 5) + 1;
+        while (num === rand_num) {
+            rand_num = Math.floor(Math.random() * 5) + 1;
+        }
+
+
+    }
+
+    btnstart.onclick = () => {
+        shots++;
+        btnstart.style.display = "none";
+        //显示分数
+        random_img(rand_num);
+    }
+</script>
+</body>
+</html>
